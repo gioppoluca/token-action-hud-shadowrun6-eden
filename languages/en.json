@@ -1,0 +1,54 @@
+{
+  "tokenActionHud": {
+    "shadowrun6": {
+      "armor": "Armor",
+      "attribute": "Attribute",
+      "attributes": "Attributes",
+      "augmentations": "Augmentations",
+      "defense": "Defense",
+      "defenseMatrix": "Matrix Defense",
+      "defensePhysical": "Physical Defense",
+      "defenseSpellDirect": "Direct Spell Defense",
+      "defenseSpellIndirect": "Indirect Spell Defense",
+      "defenseSpellOther": "Other Spell Defense",
+      "gear": "Gear",
+      "inventory": "Inventory",
+      "item": "Item",
+      "magicResonance": "Magic & Resonance",
+      "matrix": "Matrix",
+      "noDescription": "No description available.",
+      "powers": "Powers",
+      "qualities": "Qualities",
+      "rating": "Rating",
+      "resonance": "Resonance",
+      "rituals": "Rituals",
+      "skill": "Skill",
+      "skills": "Skills",
+      "spells": "Spells",
+      "tests": "Tests",
+      "weapons": "Weapons",
+      "settings": {
+        "displayPassiveItems": {
+          "hint": "Choose whether to display passive/non-rollable items on the HUD. If disabled, only rollable items are shown.",
+          "name": "Display Passive Items"
+        },
+        "displayZeroSkills": {
+          "hint": "Choose whether to display skills with no dice pool on the HUD.",
+          "name": "Display Zero-Pool Skills"
+        }
+      },
+      "matrixAccess": "Matrix Access",
+      "matrixAccessSet": "Matrix access set to {access}.",
+      "noAmmoCapacity": "no ammo capacity available.",
+      "reload": "Reload",
+      "reloaded": "{name} reloaded to {count} rounds.",
+      "resistance": "Resistance",
+      "resistanceDamageAstral": "Astral Damage Resistance",
+      "resistanceDamagePhysical": "Physical Damage Resistance",
+      "resistanceDrain": "Drain Resistance",
+      "resistanceFading": "Fading Resistance",
+      "resistanceToxin": "Toxin Resistance",
+      "derived": "Derived"
+    }
+  }
+}

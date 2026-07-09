@@ -1,0 +1,54 @@
+{
+  "tokenActionHud": {
+    "shadowrun6": {
+      "armor": "Armature",
+      "attribute": "Attributo",
+      "attributes": "Attributi",
+      "augmentations": "Potenziamenti",
+      "defense": "Difesa",
+      "defenseMatrix": "Difesa Matrix",
+      "defensePhysical": "Difesa fisica",
+      "defenseSpellDirect": "Difesa incantesimo diretto",
+      "defenseSpellIndirect": "Difesa incantesimo indiretto",
+      "defenseSpellOther": "Altra difesa da incantesimo",
+      "gear": "Equipaggiamento",
+      "inventory": "Inventario",
+      "item": "Oggetto",
+      "magicResonance": "Magia & Risonanza",
+      "matrix": "Matrix",
+      "noDescription": "Nessuna descrizione disponibile.",
+      "powers": "Poteri",
+      "qualities": "Qualità",
+      "rating": "Rating",
+      "resonance": "Risonanza",
+      "rituals": "Rituali",
+      "skill": "Abilità",
+      "skills": "Abilità",
+      "spells": "Incantesimi",
+      "tests": "Test",
+      "weapons": "Armi",
+      "settings": {
+        "displayPassiveItems": {
+          "hint": "Scegli se mostrare nell'HUD anche gli oggetti passivi/non tirabili. Se disabilitato, vengono mostrati solo gli oggetti tirabili.",
+          "name": "Mostra oggetti passivi"
+        },
+        "displayZeroSkills": {
+          "hint": "Scegli se mostrare nell'HUD le abilità senza pool di dadi.",
+          "name": "Mostra abilità con pool zero"
+        }
+      },
+      "matrixAccess": "Accesso Matrix",
+      "matrixAccessSet": "Accesso Matrix impostato a {access}.",
+      "noAmmoCapacity": "nessuna capacità munizioni disponibile.",
+      "reload": "Ricarica",
+      "reloaded": "{name} ricaricata a {count} colpi.",
+      "resistance": "Resistenza",
+      "resistanceDamageAstral": "Resistenza danno astrale",
+      "resistanceDamagePhysical": "Resistenza danno fisico",
+      "resistanceDrain": "Resistenza al drenaggio",
+      "resistanceFading": "Resistenza al fading",
+      "resistanceToxin": "Resistenza alle tossine",
+      "derived": "Derivati"
+    }
+  }
+}

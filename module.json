@@ -1,0 +1,76 @@
+{
+  "id": "token-action-hud-shadowrun6-eden",
+  "title": "Token Action HUD Shadowrun 6 Eden",
+  "description": "Token Action HUD system module for Shadowrun 6th Edition Eden.",
+  "authors": [
+    {
+      "name": "Luca Gioppo",
+      "url": "https://github.com/gioppoluca",
+      "discord": "gioppoluca",
+      "flags": {}
+    }
+  ],
+  "flags": {},
+  "version": "#{VERSION}#",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13",
+    "maximum": "14"
+  },
+  "esmodules": [
+    "./scripts/init.js"
+  ],
+  "scripts": [],
+  "styles": [
+    "./styles/tah-shadowrun6.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json",
+      "flags": {}
+    },
+    {
+      "lang": "it",
+      "name": "Italiano",
+      "path": "languages/it.json",
+      "flags": {}
+    }
+  ],
+  "packs": [],
+  "relationships": {
+    "systems": [
+      {
+        "id": "shadowrun6-eden",
+        "compatibility": {
+          "minimum": "3.3.0",
+          "verified": "3.3.9"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "id": "token-action-hud-core",
+        "type": "module",
+        "compatibility": {
+          "minimum": "2.1.0",
+          "verified": "2.1.1",
+          "maximum": "2.1.99"
+        }
+      }
+    ],
+    "optional": [],
+    "flags": {
+      "optional": []
+    }
+  },
+  "socket": false,
+  "url": "#{URL}#",
+  "manifest": "#{MANIFEST}#",
+  "download": "#{DOWNLOAD}#",
+  "readme": "https://github.com/gioppoluca/token-action-hud-shadowrun6-eden#README",
+  "protected": false,
+  "coreTranslation": false,
+  "library": false
+}
