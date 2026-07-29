@@ -14,8 +14,7 @@
   "version": "#{VERSION}#",
   "compatibility": {
     "minimum": "12",
-    "verified": "13",
-    "maximum": "14"
+    "verified": "13"
   },
   "esmodules": [
     "./scripts/init.js"

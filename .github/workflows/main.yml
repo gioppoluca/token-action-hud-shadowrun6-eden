@@ -157,6 +157,23 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
           body: ${{ github.event.release.body }}
 
+      - name: Publish to FoundryMods
+        run: |
+          curl -X POST https://foundrymods.com/api/public/v1/packages/release_version \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${{ secrets.FOUNDRYMODS_TOKEN }}" \
+            -d @- <<EOF
+          {
+            "id": "${{ github.repository }}",
+            "release": {
+              "version": "${{ github.event.release.tag_name }}",
+              "manifest": "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/module.json",
+              "notes": "${{ github.event.release.html_url }}",
+              "compatibility": { "minimum": "13", "verified": "13" },
+              "changelog": ${{ toJSON(github.event.release.body) }}
+            }
+          }
+          EOF
 
       - name: "FoundryVTT API publish"
         uses: indiesdev/curl@v1.1
@@ -166,7 +183,7 @@ jobs:
           method: "POST"
           headers: '{ "Content-Type": "application/json", "Authorization": "${{ secrets.FOUNDRY_API_TOKEN }}" }'
           accept: 200
-          body: '{"id": "token-action-hud-shadowrun6-eden", "dry-run": false, "release": { "version": "${{ github.event.release.tag_name }}", "manifest": "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/module.json", "notes": "https://github.com/gioppoluca/token-action-hud-shadowrun6-eden/blob/master/CHANGELOG.md", "compatibility": { "minimum": "13", "verified": "14", "maximum": "14" } } }'
+          body: '{"id": "token-action-hud-shadowrun6-eden", "dry-run": false, "release": { "version": "${{ github.event.release.tag_name }}", "manifest": "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/module.json", "notes": "https://github.com/gioppoluca/token-action-hud-shadowrun6-eden/blob/master/CHANGELOG.md", "compatibility": { "minimum": "13", "verified": "14" } } }'
           log-response: true
           timeout: 20000
       - name: "Use response"
