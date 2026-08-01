@@ -71,5 +71,13 @@
   "readme": "https://github.com/gioppoluca/token-action-hud-shadowrun6-eden#README",
   "protected": false,
   "coreTranslation": false,
-  "library": false
+  "library": false,
+  "media": [
+    {
+      "type": "icon",
+      "url": "https://raw.githubusercontent.com/gioppoluca/token-action-hud-shadowrun6-eden/master/img/banner.webp",
+      "loop": false,
+      "flags": {}
+    }
+  ]
 }
