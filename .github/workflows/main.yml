@@ -169,7 +169,7 @@ jobs:
               "version": "${{ github.event.release.tag_name }}",
               "manifest": "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/module.json",
               "notes": "${{ github.event.release.html_url }}",
-              "compatibility": { "minimum": "12", "verified": "13" },
+              "compatibility": { "minimum": "13", "verified": "14" },
               "changelog": ${{ toJSON(github.event.release.body) }}
             }
           }
@@ -183,7 +183,7 @@ jobs:
           method: "POST"
           headers: '{ "Content-Type": "application/json", "Authorization": "${{ secrets.FOUNDRY_API_TOKEN }}" }'
           accept: 200
-          body: '{"id": "token-action-hud-shadowrun6-eden", "dry-run": false, "release": { "version": "${{ github.event.release.tag_name }}", "manifest": "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/module.json", "notes": "https://github.com/gioppoluca/token-action-hud-shadowrun6-eden/blob/master/CHANGELOG.md", "compatibility": { "minimum": "12", "verified": "13" } } }'
+          body: '{"id": "token-action-hud-shadowrun6-eden", "dry-run": false, "release": { "version": "${{ github.event.release.tag_name }}", "manifest": "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/module.json", "notes": "https://github.com/gioppoluca/token-action-hud-shadowrun6-eden/blob/master/CHANGELOG.md", "compatibility": { "minimum": "13", "verified": "14" } } }'
           log-response: true
           timeout: 20000
       - name: "Use response"
