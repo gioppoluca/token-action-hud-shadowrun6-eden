@@ -56,8 +56,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     return this.#handleResistanceAction(actor, actionId)
                 case 'matrix':
                     return this.#handleMatrixAction(actor, actionId)
-                case 'matrixAccess':
-                    return this.#handleMatrixAccessAction(actor, actionId)
                 case 'utility':
                     return this.#handleUtilityAction(token, actionId)
                 default:
@@ -68,8 +66,20 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         async #handleAttributeAction(actor, attributeId) {
             const rollTypes = await Utils.importRollTypes()
             const attributeName = Utils.localize(`attrib.${attributeId}`, attributeId.toUpperCase())
-            const roll = this.#preparedRoll(rollTypes, rollTypes.RollType?.Common ?? 'common')
 
+            if (rollTypes.ActorAttributeRoll) {
+                const roll = new rollTypes.ActorAttributeRoll(actor, this.#attributePath(actor, attributeId))
+                roll.actionText = game.sr6?.utils?.rollText?.('attributeonly-roll attribute-poolmod', attributeId) ?? attributeName
+                roll.checkText = roll.actionText
+                roll.title = roll.actionText
+                roll.performer = actor.system
+                return this.#rollCommon(actor, roll, {
+                    useModifier: true,
+                    useThreshold: true
+                }, attributeName)
+            }
+
+            const roll = this.#preparedRoll(rollTypes, rollTypes.RollType?.Common ?? 'common')
             roll.pool = this.#attributePool(actor, attributeId)
             roll.actionText = game.sr6?.utils?.rollText?.('attributeonly-roll attribute-poolmod', attributeId) ?? attributeName
             roll.checkText = roll.actionText
@@ -85,10 +95,9 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             }, attributeName)
         }
 
-
         async #handleDerivedAction(actor, rollId) {
             const rollTypes = await Utils.importRollTypes()
-            const derived = actor.system?.derived?.[rollId]
+            const derived = this.#systemProperty(actor, `derived.${rollId}`)
             const label = Utils.localize(`shadowrun6.derived.${rollId}`, this.#humanize(rollId))
             const roll = this.#preparedRoll(rollTypes, rollTypes.RollType?.Common ?? 'common')
 
@@ -121,7 +130,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             roll.skillId = skillId
             roll.skillSpec = skillSpec || undefined
             roll.skillDef = CONFIG.SR6?.ATTRIB_BY_SKILL?.get?.(skillId)
-            roll.skillValue = actor.system?.skills?.[skillId]
+            roll.skillValue = this.#systemProperty(actor, `skills.${skillId}`)
             roll.attrib = roll.skillDef?.attrib
             roll.performer = actor.system
 
@@ -140,6 +149,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             if (item.type === 'spell') return this.#rollSpell(actor, item, false)
             if (item.type === 'ritual') return this.#rollSpell(actor, item, true)
             if (item.type === 'complexform') return this.#rollComplexForm(actor, item)
+            if (item.type === 'spritepower') return this.#rollSpritePower(actor, item)
 
             return this.#toChat(item)
         }
@@ -157,12 +167,12 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
 
         async #handleDefenseAction(actor, defendWith) {
             if (typeof actor.rollDefense !== 'function') return ui.notifications.warn('Shadowrun 6 Eden actor.rollDefense is not available.')
-            return actor.rollDefense(defendWith, 0)
+            return actor.rollDefense({ defendWith, threshold: 0, damage: 0 })
         }
 
         async #handleResistanceAction(actor, rollId) {
             const rollTypes = await Utils.importRollTypes()
-            const defensePool = actor.system?.defensepool?.[rollId]
+            const defensePool = this.#systemProperty(actor, `defensepool.${rollId}`)
             const label = Utils.localize(`shadowrun6.defense.${rollId}`, this.#humanize(rollId))
             const rollType = ['damage_physical', 'damage_astral'].includes(rollId)
                 ? rollTypes.RollType?.Soak ?? 'soak'
@@ -191,7 +201,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
 
             const rollTypes = await Utils.importRollTypes()
             try {
-                const roll = new rollTypes.MatrixActionRoll(actor.system, action)
+                const roll = new rollTypes.MatrixActionRoll(actor, action)
                 return actor.performMatrixAction(roll)
             } catch (error) {
                 console.warn('Token Action HUD Shadowrun 6 Eden | Falling back from MatrixActionRoll constructor.', error)
@@ -200,14 +210,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             const roll = this.#preparedRoll(rollTypes, rollTypes.RollType?.MatrixAction ?? 'matrix')
             roll.action = action
             return actor.performMatrixAction(roll)
-        }
-
-        async #handleMatrixAccessAction(actor, accessLevel) {
-            if (!['outsider', 'user', 'admin'].includes(accessLevel)) return
-            await actor.setFlag('shadowrun6-eden', 'matrix-access', accessLevel)
-            return ui.notifications.info(game.i18n.format('tokenActionHud.shadowrun6.matrixAccessSet', {
-                access: Utils.localize(`shadowrun6.matrix.accessLevel.${accessLevel}`, accessLevel)
-            }))
         }
 
         async #handleUtilityAction(token, actionId) {
@@ -220,7 +222,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
 
         async #rollGear(actor, item) {
             const rollTypes = await Utils.importRollTypes()
-            const roll = new rollTypes.WeaponRoll(actor.system, item, item.id, item.system)
+            const roll = new rollTypes.WeaponRoll(actor, item)
             roll.useWildDie = item.system?.wild ? 1 : 0
 
             if (typeof actor.rollItem === 'function') return actor.rollItem(roll)
@@ -241,7 +243,16 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             const rollTypes = await Utils.importRollTypes()
             const roll = new rollTypes.ComplexFormRoll(actor.system, item, item.id, item.system)
 
-            if (typeof actor.rollComplexForm === 'function') return actor.rollComplexForm(roll)
+            if (typeof actor.rollResonanceAbility === 'function') return actor.rollResonanceAbility(roll)
+            return this.#fallbackPoolRoll(actor, this.#skillPool(actor, item.system?.skill, item.system?.skillSpec), item.name)
+        }
+
+        async #rollSpritePower(actor, item) {
+            const rollTypes = await Utils.importRollTypes()
+            if (!rollTypes.SpritePowerRoll) return this.#toChat(item)
+
+            const roll = new rollTypes.SpritePowerRoll(item)
+            if (typeof actor.rollResonanceAbility === 'function') return actor.rollResonanceAbility(roll)
             return this.#fallbackPoolRoll(actor, this.#skillPool(actor, item.system?.skill, item.system?.skillSpec), item.name)
         }
 
@@ -280,20 +291,44 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             } catch {
                 return 0
             }
-            const skill = actor.system?.skills?.[skillId]
-            return Number(skill?.pool ?? skill?.points ?? 0) + Number(skill?.modifier ?? 0) + Number(skill?.augment ?? 0)
+            return this.#pool(this.#systemProperty(actor, `skills.${skillId}`))
         }
 
         #attributePool(actor, attributeId) {
-            const attribute = actor.system?.attributes?.[attributeId]
-            if (!attribute) return 0
-            if (attribute.pool !== undefined) return Number(attribute.pool) || 0
-            return Number(attribute.base ?? 0) + Number(attribute.mod ?? 0) + Number(attribute.augment ?? 0)
+            return this.#pool(this.#systemProperty(actor, `attributes.${attributeId}`)
+                ?? this.#systemProperty(actor, `attributes.${this.#v2AttributeId(attributeId)}`))
+        }
+
+        #attributePath(actor, attributeId) {
+            const mapped = this.#v2AttributeId(attributeId)
+            const legacyPath = `system.attributes.${attributeId}`
+            const v2Path = mapped ? `system.attributes.${mapped}` : legacyPath
+            if (foundry.utils.getProperty(actor, v2Path) !== undefined) return v2Path
+            return legacyPath
+        }
+
+        #systemProperty(actor, path) {
+            try {
+                if (typeof actor?.getSystemProperty === 'function') {
+                    const value = actor.getSystemProperty(path)
+                    if (value !== undefined) return value
+                }
+            } catch { }
+
+            return foundry.utils.getProperty(actor?.system ?? {}, path)
+        }
+
+        #v2AttributeId(attributeId) {
+            return game.sr6?.config?.ATTRIBUTE_TO_V2?.[attributeId]
+                ?? CONFIG.SR6?.ATTRIBUTE_TO_V2?.[attributeId]
         }
 
         #pool(value) {
             if (value?.pool !== undefined) return Number(value.pool) || 0
+            if (value?.poolS !== undefined) return Number(value.poolS) || 0
+            if (value?.poolE !== undefined) return Number(value.poolE) || 0
             if (value?.value !== undefined) return Number(value.value) || 0
+            if (value?.rank !== undefined) return Number(value.rank ?? 0) + Number(value.mod ?? 0) + Number(value.augment ?? 0)
             if (value?.base !== undefined) return Number(value.base) + Number(value.mod ?? 0) + Number(value.augment ?? 0)
             return Number(value) || 0
         }

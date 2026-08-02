@@ -1,4 +1,4 @@
-import { ACTION_TYPE, ATTRIBUTE_IDS, DEFENSE_ACTIONS, DERIVED_ACTIONS, MATRIX_ACCESS_ACTIONS, RESISTANCE_ACTIONS } from './constants.js'
+import { ACTION_TYPE, ATTRIBUTE_IDS, DEFENSE_ACTIONS, DERIVED_ACTIONS, RESISTANCE_ACTIONS } from './constants.js'
 import { Utils } from './utils.js'
 
 export let ActionHandler = null
@@ -37,7 +37,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             this.#buildDefenseActions()
             this.#buildResistanceActions()
             this.#buildMatrixActions()
-            this.#buildMatrixAccessActions()
             this.#buildUtilityActions()
         }
 
@@ -46,15 +45,15 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         }
 
         #buildAttributes() {
-            const attributes = this.actor?.system?.attributes ?? {}
             const actions = ATTRIBUTE_IDS
-                .filter(attributeId => attributes[attributeId])
-                .filter(attributeId => this.#shouldShowAttribute(attributeId, attributes[attributeId]))
-                .map(attributeId => {
+                .map(attributeId => [attributeId, this.#attributeValue(attributeId)])
+                .filter(([, attribute]) => attribute)
+                .filter(([attributeId, attribute]) => this.#shouldShowAttribute(attributeId, attribute))
+                .map(([attributeId, attribute]) => {
                     const name = this.#attributeName(attributeId)
                     return {
                         id: attributeId,
-                        name: this.#nameWithPool(name, attributes[attributeId]),
+                        name: this.#nameWithPool(name, attribute),
                         listName: this.#listName('attribute', name),
                         encodedValue: ['attribute', attributeId].join(this.delimiter)
                     }
@@ -63,16 +62,15 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             this.addActions(actions, { id: 'attributes', type: 'system' })
         }
 
-
         #buildDerivedActions() {
-            const derived = this.actor?.system?.derived ?? {}
             const actions = DERIVED_ACTIONS
-                .filter(rollId => derived[rollId])
-                .map(rollId => {
+                .map(rollId => [rollId, this.#systemProperty(`derived.${rollId}`)])
+                .filter(([, derived]) => derived)
+                .map(([rollId, derived]) => {
                     const name = Utils.localize(`shadowrun6.derived.${rollId}`, this.#humanize(rollId))
                     return {
                         id: rollId,
-                        name: this.#nameWithPool(name, derived[rollId]),
+                        name: this.#nameWithPool(name, derived),
                         listName: this.#listName('derived', name),
                         encodedValue: ['derived', rollId].join(this.delimiter)
                     }
@@ -82,7 +80,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         }
 
         #buildSkills() {
-            const skills = this.actor?.system?.skills ?? {}
+            const skills = this.#systemProperty('skills') ?? {}
             const actions = []
 
             for (const [skillId, skill] of Object.entries(skills)) {
@@ -147,14 +145,14 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         }
 
         #buildDefenseActions() {
-            const defensePool = this.actor?.system?.defensepool ?? {}
             const actions = DEFENSE_ACTIONS
-                .filter(action => defensePool[action.id])
-                .map(action => {
+                .map(action => [action, this.#systemProperty(`defensepool.${action.id}`)])
+                .filter(([, defensePool]) => defensePool)
+                .map(([action, defensePool]) => {
                     const name = coreModule.api.Utils.i18n(action.name)
                     return {
                         id: action.id,
-                        name: this.#nameWithPool(name, defensePool[action.id]),
+                        name: this.#nameWithPool(name, defensePool),
                         listName: this.#listName('defense', name),
                         encodedValue: ['defense', action.defendWith].join(this.delimiter)
                     }
@@ -164,14 +162,14 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         }
 
         #buildResistanceActions() {
-            const defensePool = this.actor?.system?.defensepool ?? {}
             const actions = RESISTANCE_ACTIONS
-                .filter(action => defensePool[action.id])
-                .map(action => {
+                .map(action => [action, this.#systemProperty(`defensepool.${action.id}`)])
+                .filter(([, defensePool]) => defensePool)
+                .map(([action, defensePool]) => {
                     const name = coreModule.api.Utils.i18n(action.name)
                     return {
                         id: action.id,
-                        name: this.#nameWithPool(name, defensePool[action.id]),
+                        name: this.#nameWithPool(name, defensePool),
                         listName: this.#listName('resistance', name),
                         encodedValue: ['resistance', action.id].join(this.delimiter)
                     }
@@ -198,24 +196,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 })
 
             this.addActions(actions, { id: 'matrix', type: 'system' })
-        }
-
-        #buildMatrixAccessActions() {
-            if (!this.actor?.system?.persona && !this.actor?.system?.matrix) return
-
-            const currentAccess = this.#matrixAccessLevel()
-            const actions = MATRIX_ACCESS_ACTIONS.map(action => {
-                const name = coreModule.api.Utils.i18n(action.name)
-                const displayName = action.id === currentAccess ? `✓ ${name}` : name
-                return {
-                    id: action.id,
-                    name: displayName,
-                    listName: this.#listName('matrixAccess', name),
-                    encodedValue: ['matrixAccess', action.id].join(this.delimiter)
-                }
-            })
-
-            this.addActions(actions, { id: 'matrixAccess', type: 'system' })
         }
 
         #buildUtilityActions() {
@@ -281,14 +261,46 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
 
         #pool(value) {
             if (value?.pool !== undefined) return Number(value.pool) || 0
+            if (value?.poolS !== undefined) return Number(value.poolS) || 0
+            if (value?.poolE !== undefined) return Number(value.poolE) || 0
             if (value?.value !== undefined) return Number(value.value) || 0
+            if (value?.rank !== undefined) return Number(value.rank ?? 0) + Number(value.mod ?? 0) + Number(value.augment ?? 0)
             if (value?.base !== undefined) return Number(value.base) + Number(value.mod ?? 0) + Number(value.augment ?? 0)
             return Number(value) || 0
         }
 
         #skillPool(skill) {
             if (skill?.pool !== undefined) return Number(skill.pool) || 0
+            if (skill?.poolS !== undefined) return Number(skill.poolS) || 0
+            if (skill?.poolE !== undefined) return Number(skill.poolE) || 0
+            if (skill?.rank !== undefined) return Number(skill.rank ?? 0) + Number(skill.mod ?? 0) + Number(skill.augment ?? 0)
             return Number(skill?.points ?? 0) + Number(skill?.modifier ?? 0) + Number(skill?.augment ?? 0)
+        }
+
+        #attributeValue(attributeId) {
+            const mapped = this.#v2AttributeId(attributeId)
+            return this.#systemProperty(`attributes.${attributeId}`)
+                ?? (mapped ? this.#systemProperty(`attributes.${mapped}`) : undefined)
+        }
+
+        #skillById(skillId) {
+            return this.#systemProperty(`skills.${skillId}`)
+        }
+
+        #systemProperty(path) {
+            try {
+                if (typeof this.actor?.getSystemProperty === 'function') {
+                    const value = this.actor.getSystemProperty(path)
+                    if (value !== undefined) return value
+                }
+            } catch { }
+
+            return foundry.utils.getProperty(this.actor?.system ?? {}, path)
+        }
+
+        #v2AttributeId(attributeId) {
+            return game.sr6?.config?.ATTRIBUTE_TO_V2?.[attributeId]
+                ?? CONFIG.SR6?.ATTRIBUTE_TO_V2?.[attributeId]
         }
 
         #skillSpecializations(skill) {
@@ -335,7 +347,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         }
 
         #isRollableItem(item) {
-            if (item.type === 'spell' || item.type === 'ritual' || item.type === 'complexform') return true
+            if (item.type === 'spell' || item.type === 'ritual' || item.type === 'complexform' || item.type === 'spritepower') return true
             return Boolean(item.system?.skill)
         }
 
@@ -346,37 +358,41 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
 
         #isMatrixActionAvailable(_actionId, action) {
             if (!action?.skill) return false
-            if (!this.#matrixAccessAllows(action)) return false
-            if (action.skill === 'cracking' && this.#skillPool(this.actor.system?.skills?.cracking) <= 0) return false
+            if (this.#matrixPool(action) <= 0) return false
 
             if (action.linkedAttr === null || action.linkedAttr === undefined) return true
-            const used = this.actor.system?.persona?.used ?? {}
-            if (action.linkedAttr === 'a' && Number(used.a ?? 0) > 0) return true
-            if (action.linkedAttr === 's' && Number(used.s ?? 0) > 0) return true
-            return false
+            return this.#matrixAttributePool(action.linkedAttr) > 0
         }
 
-        #matrixAccessAllows(action) {
-            const access = this.#matrixAccessLevel()
-            if (access === 'admin') return Boolean(action.admin)
-            if (access === 'user') return Boolean(action.user)
-            return Boolean(action.outsider)
-        }
+        #matrixAttributePool(attributeId) {
+            try {
+                if (typeof this.actor?.getMatrixPool === 'function') {
+                    const pool = Number(this.actor.getMatrixPool(attributeId) ?? 0)
+                    if (Number.isFinite(pool)) return pool
+                }
+            } catch { }
 
-        #matrixAccessLevel() {
-            return this.actor?.getFlag?.('shadowrun6-eden', 'matrix-access') ?? 'outsider'
+            const mapped = this.#v2AttributeId(attributeId)
+            const legacy = this.actor?.system?.persona?.used?.[attributeId]
+            if (legacy !== undefined) return Number(legacy) || 0
+
+            return this.#pool(foundry.utils.getProperty(this.actor?.system ?? {}, `matrix.attributes.${mapped}`))
         }
 
         #matrixPool(action) {
             if (!action?.skill) return 0
             try {
                 if (typeof this.actor?._getSkillPool === 'function') {
-                    return this.actor._getSkillPool(action.skill, action.specialization, action.attrib)
+                    let attrib = action.attrib
+                    if (this.actor?.system instanceof foundry.abstract.DataModel) attrib = this.#v2AttributeId(attrib) ?? attrib
+                    const attributePath = attrib ? `system.attributes.${attrib}.pool` : undefined
+                    return this.actor._getSkillPool(action.skill, action.specialization, attributePath)
                 }
             } catch {
                 return 0
             }
-            return this.#skillPool(this.actor?.system?.skills?.[action.skill])
+
+            return this.#skillPool(this.#skillById(action.skill))
         }
 
         #humanize(value) {

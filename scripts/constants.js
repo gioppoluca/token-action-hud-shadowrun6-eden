@@ -33,7 +33,6 @@ export const ACTION_TYPE = {
     derived: 'tokenActionHud.shadowrun6.derived',
     item: 'tokenActionHud.shadowrun6.item',
     matrix: 'tokenActionHud.shadowrun6.matrix',
-    matrixAccess: 'tokenActionHud.shadowrun6.matrixAccess',
     reload: 'tokenActionHud.shadowrun6.reload',
     resistance: 'tokenActionHud.shadowrun6.resistance',
     skill: 'tokenActionHud.shadowrun6.skill',
@@ -57,7 +56,6 @@ export const GROUP = {
     powers: { id: 'powers', name: 'tokenActionHud.shadowrun6.powers', type: 'system' },
     resonance: { id: 'resonance', name: 'tokenActionHud.shadowrun6.resonance', type: 'system' },
     matrix: { id: 'matrix', name: 'tokenActionHud.shadowrun6.matrix', type: 'system' },
-    matrixAccess: { id: 'matrixAccess', name: 'tokenActionHud.shadowrun6.matrixAccess', type: 'system' },
     defense: { id: 'defense', name: 'tokenActionHud.shadowrun6.defense', type: 'system' },
     resistance: { id: 'resistance', name: 'tokenActionHud.shadowrun6.resistance', type: 'system' },
     combat: { id: 'combat', name: 'tokenActionHud.combat', type: 'system' },
@@ -67,7 +65,7 @@ export const GROUP = {
 export const ATTRIBUTE_IDS = ['bod', 'agi', 'rea', 'str', 'wil', 'log', 'int', 'cha', 'mag', 'res']
 
 /**
- * Defense actions supported by Shadowrun6Actor.rollDefense(defendWith, threshold, damage, monitor).
+ * Defense actions supported by Shadowrun6Actor.rollDefense({ defendWith, threshold, damage }).
  * Matrix defense and soak/resistance checks use separate generic/common check flows.
  */
 export const DEFENSE_ACTIONS = [
@@ -88,10 +86,5 @@ export const RESISTANCE_ACTIONS = [
     { id: 'fading', name: 'tokenActionHud.shadowrun6.resistanceFading' }
 ]
 
-export const MATRIX_ACCESS_ACTIONS = [
-    { id: 'outsider', name: 'shadowrun6.matrix.accessLevel.outsider' },
-    { id: 'user', name: 'shadowrun6.matrix.accessLevel.user' },
-    { id: 'admin', name: 'shadowrun6.matrix.accessLevel.admin' }
-]
 
 export const DERIVED_ACTIONS = ['composure', 'judge_intentions', 'memory', 'lift_carry', 'matrix_perception']

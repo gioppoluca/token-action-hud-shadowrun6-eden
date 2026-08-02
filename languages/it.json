@@ -37,8 +37,6 @@
           "name": "Mostra abilità con pool zero"
         }
       },
-      "matrixAccess": "Accesso Matrix",
-      "matrixAccessSet": "Accesso Matrix impostato a {access}.",
       "noAmmoCapacity": "nessuna capacità munizioni disponibile.",
       "reload": "Ricarica",
       "reloaded": "{name} ricaricata a {count} colpi.",

@@ -37,8 +37,6 @@
           "name": "Display Zero-Pool Skills"
         }
       },
-      "matrixAccess": "Matrix Access",
-      "matrixAccessSet": "Matrix access set to {access}.",
       "noAmmoCapacity": "no ammo capacity available.",
       "reload": "Reload",
       "reloaded": "{name} reloaded to {count} rounds.",

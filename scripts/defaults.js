@@ -63,8 +63,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 id: 'matrix',
                 name: coreModule.api.Utils.i18n('tokenActionHud.shadowrun6.matrix'),
                 groups: [
-                    { ...groups.matrix, nestId: 'matrix_matrix' },
-                    { ...groups.matrixAccess, nestId: 'matrix_access' }
+                    { ...groups.matrix, nestId: 'matrix_matrix' }
                 ]
             },
             {
